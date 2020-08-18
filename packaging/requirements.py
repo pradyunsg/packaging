@@ -91,6 +91,13 @@ REQUIREMENT = stringStart + NAMED_REQUIREMENT + stringEnd
 REQUIREMENT.parseString("x[]")
 
 
+def _parse(string):
+    try:
+        return REQUIREMENT.parseString(requirement_string)
+    except ParseException as e:
+        raise InvalidRequirement(position=e.loc, message=e.msg)
+
+
 class Requirement(object):
     """Parse a requirement.
 
@@ -106,10 +113,7 @@ class Requirement(object):
 
     def __init__(self, requirement_string):
         # type: (str) -> None
-        try:
-            req = REQUIREMENT.parseString(requirement_string)
-        except ParseException as e:
-            raise InvalidRequirement(position=e.loc, message=e.msg)
+        req = _parse(requirement_string)
 
         self.name = req.name
         if req.url:
