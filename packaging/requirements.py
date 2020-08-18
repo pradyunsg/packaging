@@ -20,9 +20,21 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class InvalidRequirement(ValueError):
-    """
-    An invalid requirement was found, users should refer to PEP 508.
-    """
+    """Raised when a given string could not be parsed as a requirement."""
+
+    def __init__(self, position, message):
+        self.position = position
+        self.message = message
+
+    def __str__(self):
+        return 'InvalidRequirement: {message} at position {position}'.format(
+            position=self.position, message=self.message,
+        )
+
+    def __repr__(self):
+        return "<InvalidRequirement(position={position}, message={message}>".format(
+            position=self.position, message=self.message,
+        )
 
 
 ALPHANUM = Word(string.ascii_letters + string.digits)
@@ -97,11 +109,7 @@ class Requirement(object):
         try:
             req = REQUIREMENT.parseString(requirement_string)
         except ParseException as e:
-            raise InvalidRequirement(
-                'Parse error at "{0!r}": {1}'.format(
-                    requirement_string[e.loc : e.loc + 8], e.msg
-                )
-            )
+            raise InvalidRequirement(position=e.loc, message=e.msg)
 
         self.name = req.name
         if req.url:
